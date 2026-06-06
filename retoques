@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Electricista">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Relevamiento Eléctrico</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg:#0d0d12;--bg2:#13131a;--bg3:#1c1c26;--bg4:#252535;
+  --border:#2a2a3a;--border2:#353550;
+  --purple:#7c3aed;--purple2:#6d28d9;--purple3:#9f67ff;--purple-glow:rgba(124,58,237,.35);
+  --gold:#facc15;--gold2:#f59e0b;--gold-glow:rgba(250,204,21,.25);
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;--cyan:#06b6d4;
+  --text:#f4f4f8;--text2:#9090b0;--text3:#55556a;
+  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --font:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{max-width:700px;margin:0 auto;padding:1rem 1rem 6rem;position:relative}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:center;gap:12px;padding:.9rem 1.2rem;background:rgba(19,19,26,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--radius);border:1px solid var(--border2);margin-bottom:1.2rem;position:sticky;top:0;z-index:20;box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 0.5px rgba(124,58,237,.15)}
+.hicon{width:38px;height:38px;background:linear-gradient(135deg,var(--purple),var(--purple2));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;box-shadow:0 0 20px var(--purple-glow),inset 0 1px 0 rgba(255,255,255,.15);position:relative;overflow:hidden}
+.hicon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 60%);border-radius:inherit}
+.htxt h1{font-size:15px;font-weight:800;letter-spacing:-.3px;background:linear-gradient(90deg,var(--text),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.htxt p{font-size:10px;color:var(--text3);margin-top:1px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.hright{margin-left:auto;display:flex;align-items:center;gap:8px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:all .4s}
+.sdot.online{background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.sdot.loading{background:var(--amber);animation:sdotPulse 1s ease infinite}
+@keyframes sdotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0;margin-bottom:1.2rem;background:var(--bg2);border-radius:50px;padding:4px;border:1px solid var(--border)}
+.tab{flex:1;padding:10px 8px;border:none;background:none;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-radius:50px;transition:all .25s;touch-action:manipulation;letter-spacing:.01em}
+.tab.active{background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;box-shadow:0 4px 15px var(--purple-glow)}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:1.4rem}
+.prog-labels{display:flex;justify-content:space-between;margin-bottom:8px}
+.prog-labels span{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.03em;transition:all .3s;cursor:default}
+.prog-labels span.act{color:var(--purple3);text-shadow:0 0 12px var(--purple-glow)}
+.pbar{display:flex;gap:5px}
+.ps{flex:1;height:3px;border-radius:2px;background:var(--bg3);transition:all .4s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.ps.done{background:linear-gradient(90deg,var(--purple),var(--purple3))}
+.ps.done::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s ease infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ── STEPS ── */
+.step{display:none}
+.step.active{display:block;animation:stepSlide .35s cubic-bezier(.4,0,.2,1)}
+@keyframes stepSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem}
+.sb{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px var(--purple-glow)}
+.st{font-size:17px;font-weight:800;letter-spacing:-.4px;background:linear-gradient(90deg,var(--text) 60%,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ── CARDS ── */
+.card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1rem;position:relative;overflow:hidden;transition:border-color .3s}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,58,237,.4),transparent)}
+.card:focus-within{border-color:var(--border2)}
+
+/* ── INPUTS ── */
+.fr{display:grid;gap:12px;margin-bottom:12px}
+.c1{grid-template-columns:1fr}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:420px){.c3{grid-template-columns:1fr 1fr}}
+.field{position:relative}
+label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none;transition:color .2s}
+input,select{width:100%;padding:10px 12px;font-size:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text);font-family:var(--font);font-weight:500;-webkit-appearance:none;transition:all .2s}
+input.has-icon,select.has-icon{padding-left:34px}
+input:focus,select:focus{outline:none;border-color:var(--purple);background:var(--bg4);box-shadow:0 0 0 3px rgba(124,58,237,.15),0 2px 8px rgba(0,0,0,.2)}
+input::placeholder{color:var(--text3)}
+select option{background:var(--bg3);color:var(--text)}
+input:focus ~ .input-icon, select:focus ~ .input-icon{color:var(--purple3)}
+
+/* ── SEC LABEL ── */
+.sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:1.2rem 0 .6rem;display:flex;align-items:center;gap:6px;position:relative}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* ── ROOMS ── */
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:.75rem;transition:all .25s;position:relative;overflow:hidden}
+.rc::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--purple),var(--purple2));border-radius:3px 0 0 3px;opacity:0;transition:opacity .2s}
+.rc:focus-within::before{opacity:1}
+.rctop{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.room-sel{background:none;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);color:var(--text);padding:4px 8px;border-radius:8px;border:1px solid transparent;transition:all .2s;-webkit-appearance:none;max-width:200px}
+.room-sel:hover{background:var(--bg3);border-color:var(--border)}
+.room-sel:focus{outline:none;border-color:var(--purple)}
+.brm{background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;padding:4px 6px;border-radius:6px;transition:all .2s}
+.brm:hover{color:var(--red);background:rgba(239,68,68,.1)}
+.metros-row{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding:.5rem .75rem;background:var(--bg3);border-radius:var(--radius-xs);border:1px solid var(--border)}
+.metros-row span{font-size:12px;color:var(--text2);font-weight:500}
+.metros-row input{width:65px;padding:4px 8px;font-size:14px;border:1px solid var(--border);border-radius:6px;background:var(--bg4);text-align:center}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+@media(max-width:380px){.rgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── COUNTER ITEMS ── */
+.ci{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 5px;text-align:center;transition:all .2s;position:relative}
+.ci.has-val{border-color:var(--border2);background:var(--bg4)}
+.ci.has-val::after{content:'';position:absolute;inset:-1px;border-radius:inherit;border:1px solid var(--purple);opacity:.3;pointer-events:none}
+.cl{font-size:10px;color:var(--text2);margin-bottom:6px;line-height:1.3;font-weight:500}
+.cc{display:flex;align-items:center;justify-content:center;gap:7px}
+.bc{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;font-weight:700;touch-action:manipulation;transition:all .15s;user-select:none}
+.bc:active{background:var(--purple);border-color:var(--purple);color:#fff;transform:scale(.9);box-shadow:0 0 8px var(--purple-glow)}
+.cv{font-size:16px;font-weight:800;min-width:22px;text-align:center;color:var(--text);transition:all .15s}
+.cv.bump{animation:cvBump .2s ease}
+@keyframes cvBump{0%,100%{transform:scale(1)}50%{transform:scale(1.3);color:var(--purple3)}}
+
+/* ── ADD ROOM BUTTON ── */
+.badd{width:100%;padding:12px;border:1.5px dashed var(--border2);border-radius:var(--radius);background:none;color:var(--text2);cursor:pointer;font-size:14px;font-family:var(--font);font-weight:600;margin-bottom:.6rem;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.badd:hover{background:rgba(124,58,237,.07);border-color:var(--purple);color:var(--purple3)}
+.badd:active{transform:scale(.98)}
+
+/* ── BUTTONS ── */
+.nav{display:flex;gap:10px;margin-top:1.6rem}
+
+/* Primary button */
+.bpri{flex:1;padding:14px;background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);color:#fff;border:none;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);touch-action:manipulation;letter-spacing:.01em;position:relative;overflow:hidden;box-shadow:0 6px 20px var(--purple-glow);transition:all .2s}
+.bpri::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent 60%);border-radius:inherit;pointer-events:none}
+.bpri::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.3),transparent 60%);opacity:0;transition:opacity .3s;border-radius:inherit}
+.bpri:active::after{opacity:1}
+.bpri:active{transform:scale(.97);box-shadow:0 2px 10px var(--purple-glow)}
+
+/* Secondary button */
+.bsec{padding:14px 18px;background:transparent;border:1.5px solid var(--border2);border-radius:50px;font-size:15px;cursor:pointer;color:var(--text2);font-family:var(--font);font-weight:600;transition:all .2s;position:relative;overflow:hidden}
+.bsec:hover{border-color:var(--purple);color:var(--purple3)}
+.bsec:active{background:var(--bg3);transform:scale(.97)}
+
+/* Toggle pills */
+.tog-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.tog{padding:8px 15px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;cursor:pointer;color:var(--text2);background:transparent;font-family:var(--font);font-weight:500;touch-action:manipulation;transition:all .2s;position:relative;overflow:hidden}
+.tog::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--purple),var(--purple2));opacity:0;transition:opacity .2s;border-radius:inherit}
+.tog span{position:relative;z-index:1}
+.tog.sel{color:#fff;border-color:var(--purple);box-shadow:0 3px 12px var(--purple-glow)}
+.tog.sel::before{opacity:1}
+
+/* ── PRESUPUESTO BOX ── */
+.pbox{background:linear-gradient(135deg,#1a0a3d 0%,#0f0820 50%,#1a0a3d 100%);border-radius:var(--radius);padding:1.5rem;color:#fff;margin-bottom:1rem;box-shadow:0 8px 32px rgba(124,58,237,.4);position:relative;overflow:hidden;border:1px solid rgba(124,58,237,.3)}
+.pbox::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(124,58,237,.15),transparent 50%),radial-gradient(circle at 70% 50%,rgba(250,204,21,.06),transparent 50%);animation:pboxGlow 6s ease-in-out infinite}
+@keyframes pboxGlow{0%,100%{transform:rotate(0deg)}50%{transform:rotate(180deg)}}
+.pbox-inner{position:relative;z-index:1}
+.pbox .lbl{font-size:11px;opacity:.7;margin-bottom:6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.pbox .val{font-size:32px;font-weight:900;letter-spacing:-1px;background:linear-gradient(90deg,#fff,#e2d9ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.pbox .sub{font-size:12px;opacity:.6;margin-top:6px;font-weight:500}
+.pbox-bolt{position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);opacity:.15;animation:pboxBolt 3s ease-in-out infinite}
+@keyframes pboxBolt{0%,100%{opacity:.1;transform:translateY(-50%) scale(1)}50%{opacity:.25;transform:translateY(-50%) scale(1.05)}}
+
+/* ── MINI METRIC CARDS ── */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.mc{border-radius:var(--radius-sm);padding:1rem;position:relative;overflow:hidden;transition:transform .2s}
+.mc:active{transform:scale(.98)}
+.mc.blue{background:linear-gradient(135deg,#0f0a2a,#1a1035);border:1px solid rgba(124,58,237,.25)}
+.mc.blue::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(124,58,237,.2),transparent 70%)}
+.mc.green{background:linear-gradient(135deg,#051510,#0a2218);border:1px solid rgba(34,197,94,.2)}
+.mc.green::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%)}
+.mlbl{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.mval{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.5px}
+
+/* ── NOTE BOX ── */
+.note{background:linear-gradient(135deg,#1a1000,#1e1508);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:.875rem 1rem;font-size:12px;color:#d4a044;margin-bottom:1rem;line-height:1.7;position:relative;padding-left:2.5rem}
+.note::before{content:'⚡';position:absolute;left:.875rem;top:.875rem;font-size:16px}
+
+/* ── TABLE ── */
+.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.rtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:420px}
+.rtbl thead{background:var(--bg3)}
+.rtbl th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--text3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em}
+.rtbl td{padding:9px 10px;border-bottom:1px solid var(--bg3);color:var(--text);vertical-align:middle}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl tr:hover td{background:rgba(124,58,237,.04)}
+.pc{text-align:right;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.tb{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.2)}
+.tg{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+.tp{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.15)}
+.stotal{background:var(--bg3)!important;font-weight:800}
+.ml-link{font-size:10px;color:#a78bfa;text-decoration:none;opacity:.7;transition:opacity .2s}
+.ml-link:hover{opacity:1}
+.src-live{font-size:10px;color:var(--green);font-weight:700}
+.src-cache{font-size:10px;color:var(--amber);font-weight:700}
+.src-ref{font-size:10px;color:var(--text3)}
+
+/* ── ACTION BUTTONS ── */
+.baction{width:100%;padding:13px;background:var(--bg2);border:1.5px solid var(--border);border-radius:50px;font-size:14px;cursor:pointer;color:var(--text);font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;font-weight:600;touch-action:manipulation;transition:all .2s;letter-spacing:.01em}
+.baction:hover{border-color:var(--border2);background:var(--bg3)}
+.baction:active{transform:scale(.98)}
+.baction.primary{color:var(--purple3);border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.06)}
+.baction.primary:hover{background:rgba(124,58,237,.12);border-color:var(--purple)}
+.bnuevo{width:100%;padding:14px;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;border:none;border-radius:50px;font-size:15px;cursor:pointer;font-family:var(--font);font-weight:800;box-shadow:0 6px 20px var(--purple-glow);transition:all .2s;letter-spacing:.02em;position:relative;overflow:hidden}
+.bnuevo::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);border-radius:inherit}
+.bnuevo:active{transform:scale(.97)}
+.brecargar{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:50px;font-size:12px;color:var(--purple3);cursor:pointer;font-family:var(--font);font-weight:600;margin-bottom:1rem;transition:all .2s}
+.brecargar:hover{background:rgba(124,58,237,.15)}
+.brecargar i{transition:transform .4s}
+.brecargar:hover i{transform:rotate(180deg)}
+
+/* ── SEC LABEL ── */
+.sec-lbl{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.sec-lbl span:first-child{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:6px}
+.sec-lbl span:last-child{font-size:10px;color:var(--text3)}
+
+/* ── HISTORIAL ── */
+.buscador{width:100%;padding:11px 16px 11px 42px;font-size:14px;border:1.5px solid var(--border);border-radius:50px;background:var(--bg2);color:var(--text);font-family:var(--font);margin-bottom:1rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2355556a' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center;transition:all .2s}
+.buscador:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.hist-count{font-size:12px;color:var(--text3);font-weight:600;letter-spacing:.03em;margin-bottom:.875rem}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:.75rem;transition:all .25s;position:relative;overflow:hidden;cursor:default}
+.hist-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--purple),var(--purple2));opacity:0;transition:opacity .2s}
+.hist-item:active::before,.hist-item:hover::before{opacity:1}
+.hist-item:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.hist-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px;gap:8px}
+.hist-nombre{font-size:14px;font-weight:700;flex:1;color:var(--text);letter-spacing:-.2px}
+.hist-total{font-size:14px;font-weight:800;color:var(--purple3);white-space:nowrap;letter-spacing:-.3px}
+.hist-sub{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:500}
+.hist-tags{display:flex;gap:6px;flex-wrap:wrap}
+.hist-actions{display:flex;gap:6px;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.hbtn{padding:6px 14px;border:1px solid var(--border);border-radius:50px;font-size:12px;cursor:pointer;background:transparent;color:var(--text2);font-family:var(--font);font-weight:600;transition:all .2s}
+.hbtn:hover{border-color:var(--border2);color:var(--text)}
+.hbtn.danger{color:var(--red);border-color:rgba(239,68,68,.2)}
+.hbtn.danger:hover{background:rgba(239,68,68,.08)}
+.hist-empty{text-align:center;padding:3rem 1rem}
+.hist-empty-icon{font-size:48px;margin-bottom:.75rem;filter:grayscale(1);opacity:.3}
+
+/* ── CLIENTE RESULT ── */
+.cli-row{display:flex;align-items:center;gap:12px;margin-bottom:.75rem}
+.ava{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;box-shadow:0 0 20px var(--purple-glow)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:rgba(19,19,26,.95);backdrop-filter:blur(20px);color:var(--text);border:1px solid var(--border2);padding:11px 20px;border-radius:50px;font-size:13px;font-weight:600;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── PIEZAS ── */
+.piezas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+@media(max-width:380px){.piezas-grid{grid-template-columns:repeat(2,1fr)}}
+.pieza-btn{padding:10px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.3;transition:all .2s;touch-action:manipulation;position:relative;overflow:hidden}
+.pieza-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--purple),var(--purple2));opacity:0;transition:opacity .2s}
+.pieza-btn .pieza-icon{font-size:20px;display:block;margin-bottom:4px;position:relative;z-index:1}
+.pieza-btn .pieza-lbl{position:relative;z-index:1}
+.pieza-btn.sel{color:#fff;border-color:var(--purple);box-shadow:0 3px 12px var(--purple-glow)}
+.pieza-btn.sel::before{opacity:1}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+
+
+/* Selector de piezas */
+.piezas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(max-width:380px){.piezas-grid{grid-template-columns:repeat(2,1fr)}}
+.pieza-btn{padding:8px 6px;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer;text-align:center;line-height:1.3;transition:all .2s;touch-action:manipulation}
+.pieza-btn .pieza-icon{font-size:18px;display:block;margin-bottom:3px}
+.pieza-btn.sel{background:rgba(124,58,237,.15);border-color:var(--purple);color:var(--text);box-shadow:0 0 8px rgba(124,58,237,.2)}
+.pieza-count{display:inline-block;background:var(--purple);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;line-height:16px;text-align:center;margin-left:4px;vertical-align:middle}
+.alcance-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:600;margin-bottom:.5rem}
+.alcance-badge.full{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.alcance-badge.parcial{background:rgba(250,204,21,.12);color:#facc15;border:1px solid rgba(250,204,21,.2)}
+
+/* ── LANDING PAGE ─────────────────────────────── */
+#landing{position:fixed;inset:0;z-index:500;background:#0a0a0f;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease}
+#landing.exit{animation:landingExit .7s cubic-bezier(.7,0,.3,1) forwards}
+@keyframes landingExit{
+  0%{opacity:1;transform:translateY(0)}
+  30%{opacity:1}
+  100%{opacity:0;transform:translateY(-60px)}
+}
+
+/* Fondo con grid eléctrico */
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.07) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 8s linear infinite}
+@keyframes gridMove{to{background-position:40px 40px}}
+
+/* Glow de fondo */
+.bg-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);animation:glowPulse 4s ease-in-out infinite}
+.bg-glow2{width:300px;height:300px;background:radial-gradient(circle,rgba(250,204,21,.08) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,10%);animation:glowPulse 4s ease-in-out infinite;animation-delay:2s}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}}
+
+/* Rayos animados de fondo */
+.bg-bolt{position:absolute;opacity:0;animation:bgBoltFlash 6s ease-in-out infinite}
+.bg-bolt:nth-child(1){top:10%;left:15%;animation-delay:0s}
+.bg-bolt:nth-child(2){top:20%;right:12%;animation-delay:2s}
+.bg-bolt:nth-child(3){bottom:20%;left:10%;animation-delay:4s}
+.bg-bolt:nth-child(4){bottom:15%;right:18%;animation-delay:1.5s}
+@keyframes bgBoltFlash{
+  0%,90%,100%{opacity:0}
+  92%{opacity:.4;filter:drop-shadow(0 0 8px #facc15)}
+  96%{opacity:0}
+  98%{opacity:.25}
+}
+
+/* Rayo principal central */
+.main-bolt-wrap{position:relative;margin-bottom:2rem;animation:boltEntrance .8s cubic-bezier(.34,1.56,.64,1) .3s both}
+@keyframes boltEntrance{
+  from{opacity:0;transform:scale(.3) rotate(-30deg)}
+  to{opacity:1;transform:scale(1) rotate(0deg)}
+}
+.main-bolt-ring{position:absolute;inset:-20px;border-radius:50%;border:1.5px solid rgba(250,204,21,.3);animation:mainRing 2s ease-in-out infinite}
+.main-bolt-ring2{inset:-40px;border:1px solid rgba(124,58,237,.2);animation-delay:.5s;animation-duration:2.5s}
+.main-bolt-ring3{inset:-65px;border:1px solid rgba(124,58,237,.1);animation-delay:1s;animation-duration:3s}
+@keyframes mainRing{
+  0%,100%{transform:scale(1);opacity:.5}
+  50%{transform:scale(1.08);opacity:1}
+}
+.main-bolt-circle{width:110px;height:110px;border-radius:28px;background:linear-gradient(135deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(124,58,237,.6),0 0 80px rgba(124,58,237,.2);animation:mainBoltGlow 2s ease-in-out infinite}
+@keyframes mainBoltGlow{
+  0%,100%{box-shadow:0 0 40px rgba(124,58,237,.6),0 0 80px rgba(124,58,237,.2)}
+  50%{box-shadow:0 0 60px rgba(124,58,237,.9),0 0 120px rgba(124,58,237,.4),0 0 160px rgba(250,204,21,.1)}
+}
+.main-bolt-svg{animation:mainBoltFlash 2s ease-in-out infinite}
+@keyframes mainBoltFlash{
+  0%,70%,100%{filter:brightness(1) drop-shadow(0 0 6px rgba(250,204,21,.5))}
+  75%{filter:brightness(2.5) drop-shadow(0 0 16px #facc15)}
+  80%{filter:brightness(1)}
+  85%{filter:brightness(2) drop-shadow(0 0 10px #facc15)}
+}
+
+/* Partículas eléctricas flotantes */
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFloat linear infinite}
+@keyframes particleFloat{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  10%{opacity:1}
+  90%{opacity:.5}
+  100%{transform:translateY(-120px) translateX(var(--dx));opacity:0}
+}
+
+/* Texto landing */
+.land-eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#a78bfa;margin-bottom:.75rem;opacity:0;animation:fadeUp .5s ease .9s forwards}
+.land-title{font-size:clamp(28px,8vw,42px);font-weight:800;text-align:center;color:#fff;line-height:1.15;margin-bottom:.75rem;opacity:0;animation:fadeUp .5s ease 1.1s forwards}
+.land-title span{color:#facc15;position:relative;display:inline-block}
+.land-title span::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,#facc15,transparent);animation:underlineGrow 1s ease 1.8s both}
+@keyframes underlineGrow{from{width:0}to{width:100%}}
+.land-sub{font-size:14px;color:#888;text-align:center;margin-bottom:2.5rem;opacity:0;animation:fadeUp .5s ease 1.3s forwards;line-height:1.6;max-width:300px}
+
+/* Features */
+.land-features{display:flex;gap:1.5rem;margin-bottom:2.5rem;opacity:0;animation:fadeUp .5s ease 1.5s forwards}
+.land-feat{display:flex;flex-direction:column;align-items:center;gap:5px}
+.land-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);display:flex;align-items:center;justify-content:center;font-size:16px}
+.land-feat-txt{font-size:10px;color:#666;text-align:center;line-height:1.3}
+
+/* CTA button */
+.land-cta{opacity:0;animation:fadeUp .5s ease 1.7s forwards;position:relative}
+.land-cta-btn{padding:16px 40px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(124,58,237,.5);transition:transform .2s,box-shadow .2s;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.land-cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,58,237,.7)}
+.land-cta-btn:active{transform:scale(.97)}
+.land-cta-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);border-radius:inherit}
+.cta-bolt{animation:ctaBoltSpin 2s ease-in-out infinite}
+@keyframes ctaBoltSpin{
+  0%,100%{filter:brightness(1) drop-shadow(0 0 3px #facc15)}
+  50%{filter:brightness(2) drop-shadow(0 0 8px #facc15)}
+}
+
+/* RAYO DE TRANSICIÓN */
+#bolt-transition{position:fixed;inset:0;z-index:600;pointer-events:none;display:none}
+#bolt-transition.active{display:block}
+.bt-bolt{position:absolute;left:50%;top:0;transform:translateX(-50%);width:60px;height:100vh;display:flex;justify-content:center;overflow:visible}
+.bt-flash{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(250,204,21,.6) 0%,transparent 70%);opacity:0;animation:btFlash .5s ease forwards}
+@keyframes btFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+.bt-bolt-svg{animation:btBoltDraw .4s ease forwards;stroke-dasharray:400;stroke-dashoffset:400}
+@keyframes btBoltDraw{to{stroke-dashoffset:0}}
+.bt-shatter{position:absolute;inset:0;overflow:hidden}
+.bt-shard{position:absolute;background:#0a0a0f;animation:btShard .5s ease forwards}
+@keyframes btShard{
+  0%{transform:translateY(0) scaleX(1);opacity:1}
+  100%{transform:translateY(var(--dy)) scaleX(.8);opacity:0}
+}
+
+/* ── ANIMACIONES ────────────────────────────────── */
+
+/* Splash screen */
+.splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s ease, transform .5s ease}
+.splash.hide{opacity:0;transform:scale(1.05);pointer-events:none}
+.splash-bolt{width:80px;height:80px;animation:boltPop .6s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes boltPop{
+  0%{transform:scale(0) rotate(-20deg);opacity:0}
+  60%{transform:scale(1.2) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
+.splash-ring{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid var(--purple);opacity:0;animation:ringOut 1s ease .3s forwards}
+.splash-ring2{animation-delay:.5s;width:160px;height:160px}
+@keyframes ringOut{
+  0%{transform:scale(.5);opacity:.8}
+  100%{transform:scale(1.4);opacity:0}
+}
+.splash-title{font-size:20px;font-weight:700;color:var(--text);margin-top:1.5rem;opacity:0;animation:fadeUp .4s ease .7s forwards}
+.splash-sub{font-size:13px;color:var(--text2);margin-top:6px;opacity:0;animation:fadeUp .4s ease .9s forwards}
+.splash-bar{width:120px;height:3px;background:var(--bg3);border-radius:2px;margin-top:1.5rem;overflow:hidden;opacity:0;animation:fadeUp .3s ease 1s forwards}
+.splash-bar-fill{height:100%;background:var(--purple);border-radius:2px;animation:barFill 1.2s ease 1.1s forwards;width:0}
+@keyframes barFill{to{width:100%}}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Rayo animado en header */
+.hicon{position:relative;overflow:visible!important}
+.hicon::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:transparent;border:2px solid transparent;animation:iconPulse 3s ease-in-out infinite}
+@keyframes iconPulse{
+  0%,100%{box-shadow:0 0 8px rgba(124,58,237,.3)}
+  50%{box-shadow:0 0 20px rgba(124,58,237,.7),0 0 40px rgba(124,58,237,.3)}
+}
+.bolt-svg{animation:boltFlash 3s ease-in-out infinite}
+@keyframes boltFlash{
+  0%,85%,100%{filter:brightness(1)}
+  88%{filter:brightness(2) drop-shadow(0 0 4px #fff)}
+  92%{filter:brightness(1)}
+  95%{filter:brightness(1.8) drop-shadow(0 0 3px #fff)}
+}
+
+/* Entrada de steps */
+.step.active{animation:stepIn .3s ease}
+@keyframes stepIn{
+  from{opacity:0;transform:translateX(16px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* Contador animado */
+.count-anim{transition:all .4s ease}
+
+/* Resultado aparece */
+.pbox{animation:none}
+.pbox.show{animation:presupIn .5s cubic-bezier(.34,1.2,.64,1)}
+@keyframes presupIn{
+  from{opacity:0;transform:translateY(20px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Cards en historial */
+.hist-item{animation:cardIn .3s ease both}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Botones con ripple */
+.bpri,.bnuevo{position:relative;overflow:hidden}
+.bpri::after,.bnuevo::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;border-radius:inherit;transition:opacity .3s}
+.bpri:active::after,.bnuevo:active::after{opacity:1}
+
+/* Partículas eléctricas en header */
+.spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#a78bfa;pointer-events:none;animation:sparkFly 1.5s ease forwards}
+@keyframes sparkFly{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- SPLASH SCREEN -->
+<div class="splash" id="splash">
+  <div style="position:relative;display:flex;align-items:center;justify-content:center">
+    <div class="splash-ring"></div>
+    <div class="splash-ring splash-ring2"></div>
+    <div style="width:80px;height:80px;background:var(--purple);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(124,58,237,.6)" class="splash-bolt">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" class="bolt-svg">
+        <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+  <div class="splash-title">Relevamiento Eléctrico</div>
+  <div class="splash-sub">Diamante, Entre Ríos</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<!-- ── LANDING PAGE ──────────────────────────────────────── -->
+<div id="landing">
+  <div class="grid-bg"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-glow bg-glow2"></div>
+
+  <!-- Rayos de fondo -->
+  <svg class="bg-bolt" width="30" height="80" viewBox="0 0 24 64"><path d="M14 2L5 34H12L10 62L19 30H12L14 2Z" fill="#facc15" opacity=".6"/></svg>
+  <svg class="bg-bolt" width="22" height="60" viewBox="0 0 24 64"><path d="M14 2L5 34H12L10 62L19 30H12L14 2Z" fill="#a78bfa" opacity=".5"/></svg>
+  <svg class="bg-bolt" width="18" height="50" viewBox="0 0 24 64"><path d="M14 2L5 34H12L10 62L19 30H12L14 2Z" fill="#facc15" opacity=".4"/></svg>
+  <svg class="bg-bolt" width="25" height="70" viewBox="0 0 24 64"><path d="M14 2L5 34H12L10 62L19 30H12L14 2Z" fill="#a78bfa" opacity=".45"/></svg>
+
+  <!-- Partículas -->
+  <div id="particles"></div>
+
+  <!-- Rayo principal -->
+  <div class="main-bolt-wrap">
+    <div class="main-bolt-ring"></div>
+    <div class="main-bolt-ring main-bolt-ring2"></div>
+    <div class="main-bolt-ring main-bolt-ring3"></div>
+    <div class="main-bolt-circle">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" class="main-bolt-svg">
+        <path d="M13 2L3 14H10L9 22L21 10H14L13 2Z" fill="#facc15" stroke="#facc15" stroke-width=".5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="land-eyebrow">⚡ Herramienta profesional</div>
+
+  <h1 class="land-title">
+    Instalaciones<br><span>Eléctricas</span>
+  </h1>
+
+  <p class="land-sub">
+    Calculá materiales, mano de obra<br>y gestioná tus clientes en segundos
+  </p>
+
+  <div class="land-features">
+    <div class="land-feat">
+      <div class="land-feat-icon">📐</div>
+      <div class="land-feat-txt">Cálculo<br>automático</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-icon">💰</div>
+      <div class="land-feat-txt">Precios<br>actualizados</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-icon">📋</div>
+      <div class="land-feat-txt">Historial<br>de clientes</div>
+    </div>
+  </div>
+
+  <div class="land-cta">
+    <button class="land-cta-btn" onclick="enterApp()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="cta-bolt">
+        <path d="M13 2L3 14H10L9 22L21 10H14L13 2Z" fill="#facc15" stroke="#facc15" stroke-width=".5" stroke-linejoin="round"/>
+      </svg>
+      Ir a mi presupuesto
+    </button>
+  </div>
+</div>
+
+<!-- RAYO DE TRANSICIÓN -->
+<div id="bolt-transition">
+  <div class="bt-flash"></div>
+  <div class="bt-bolt">
+    <svg width="60" height="100vh" style="overflow:visible">
+      <path class="bt-bolt-svg" d="M30 0 L10 300 L25 300 L5 700" 
+        stroke="#facc15" stroke-width="3" fill="none"
+        filter="url(#glow)"/>
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+    </svg>
+  </div>
+  <div class="bt-shatter" id="bt-shatter"></div>
+</div>
+
+
+<div class="app" style="opacity:0;transition:opacity .5s ease .3s" id="main-app">
+  <div class="header">
+    <div class="hicon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="bolt-svg">
+        <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="htxt">
+      <h1>Relevamiento Eléctrico</h1>
+      <p>Diamante, Entre Ríos</p>
+    </div>
+    <div class="sdot" id="sdot"></div>
+  </div>
+
+  <!-- Credenciales integradas, no se necesita banner -->
+
+  <div class="tabs">
+    <button class="tab active" id="tab-btn-nuevo"   onclick="showTab('nuevo')">⚡ Nuevo</button>
+    <button class="tab"        id="tab-btn-historial" onclick="showTab('historial')">📋 Historial</button>
+  </div>
+
+  <!-- ── HISTORIAL ─────────────────────────────────────────────── -->
+  <div id="tab-historial" style="display:none">
+    <input class="buscador" id="hist-search" placeholder="🔍 Buscar por nombre o dirección…" oninput="renderHistorial()" />
+    <div class="hist-header">
+      <span class="hist-count" id="hist-count"></span>
+    </div>
+    <div id="hist-list"></div>
+  </div>
+
+  <!-- ── NUEVO ──────────────────────────────────────────────────── -->
+  <div id="tab-nuevo">
+    <div class="prog-wrap">
+      <div class="prog-labels">
+        <span id="pl1" class="act">1. Cliente</span>
+        <span id="pl2">2. Ambientes</span>
+        <span id="pl3">3. Tablero</span>
+        <span id="pl4">4. Presupuesto</span>
+      </div>
+      <div class="pbar">
+        <div class="ps" id="ps1"></div><div class="ps" id="ps2"></div>
+        <div class="ps" id="ps3"></div><div class="ps" id="ps4"></div>
+      </div>
+    </div>
+
+    <!-- PASO 1 -->
+    <div class="step active" id="step1">
+      <div class="sh"><div class="sb">1</div><div class="st">Datos del cliente</div></div>
+      <div class="card">
+        <div class="fr c1">
+          <div><label>Nombre completo</label>
+            <div class="input-wrap">
+              <i class="ti ti-user input-icon"></i>
+              <input class="has-icon" id="cli-nombre" placeholder="Ej: Juan García" autocomplete="off"/>
+            </div>
+          </div>
+        </div>
+        <div class="fr c2">
+          <div><label>Teléfono</label>
+            <div class="input-wrap">
+              <i class="ti ti-phone input-icon"></i>
+              <input class="has-icon" id="cli-tel" type="tel" placeholder="343-XXX-XXXX"/>
+            </div>
+          </div>
+          <div><label>Fecha</label>
+            <div class="input-wrap">
+              <i class="ti ti-calendar input-icon"></i>
+              <input class="has-icon" id="cli-fecha" type="date"/>
+            </div>
+          </div>
+        </div>
+        <div class="fr c1">
+          <div><label>Dirección</label>
+            <div class="input-wrap">
+              <i class="ti ti-map-pin input-icon"></i>
+              <input class="has-icon" id="cli-dir" placeholder="Calle, número" autocomplete="off"/>
+            </div>
+          </div>
+        </div>
+        <div class="fr c2">
+          <div><label>Piso / Depto</label>
+            <div class="input-wrap">
+              <i class="ti ti-building input-icon"></i>
+              <input class="has-icon" id="cli-piso" placeholder="PB"/>
+            </div>
+          </div>
+          <div><label>Tipo de obra</label>
+            <div class="input-wrap">
+              <i class="ti ti-tools input-icon"></i>
+              <select class="has-icon" id="cli-tipo" onchange="onTipoChange()">
+                <option value="nueva">🏗️ Instalación nueva</option>
+                <option value="refaccion">🔧 Refacción</option>
+                <option value="ampliacion">⚡ Ampliación</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALCANCE — aparece solo en refacción/ampliación -->
+        <div id="alcance-wrap" style="display:none">
+          <div class="sec" style="margin-top:.75rem">🏠 ¿Qué parte de la casa?</div>
+          <div class="tog-row" id="tog-alcance">
+            <button class="tog sel" onclick="setAlcance('casa',this)">🏡 Casa completa</button>
+            <button class="tog" onclick="setAlcance('piezas',this)">🚪 Piezas específicas</button>
+          </div>
+
+          <!-- Selector de piezas — solo cuando elige "piezas específicas" -->
+          <div id="piezas-wrap" style="display:none;margin-top:.75rem">
+            <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem">Seleccioná las piezas a refaccionar:</p>
+            <div class="piezas-grid" id="piezas-grid"></div>
+            <p style="font-size:11px;color:var(--text3);margin-top:.5rem">Las piezas seleccionadas se van a pre-cargar en el paso siguiente.</p>
+          </div>
+        </div>
+
+        <!-- Superficie total (solo si es casa completa o nueva) -->
+        <div id="m2-wrap" style="margin-top:.5rem">
+          <div class="fr c1"><label>Superficie total (m²)</label><input id="cli-m2" type="number" placeholder="80" min="1" inputmode="numeric"/></div>
+        </div>
+
+        <div class="fr c1" style="margin-top:.5rem">
+          <div><label>Notas</label>
+            <div class="input-wrap">
+              <i class="ti ti-notes input-icon"></i>
+              <input class="has-icon" id="cli-notas" placeholder="Observaciones…" autocomplete="off"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav"><button class="bpri" onclick="irAmbientes()">Siguiente → Ambientes</button></div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="step" id="step2">
+      <div class="sh">
+        <div class="sb">2</div>
+        <div class="st">Ambientes y bocas</div>
+        <span id="rooms-badge" style="margin-left:auto;background:rgba(124,58,237,.15);color:var(--purple3);border:1px solid rgba(124,58,237,.25);border-radius:50px;padding:3px 10px;font-size:11px;font-weight:700">0 ambientes</span>
+      </div>
+      <div id="rooms-container"></div>
+      <button class="badd" onclick="addRoom()"><i class="ti ti-plus"></i> Agregar ambiente</button>
+      <div class="nav">
+        <button class="bsec" onclick="goStep(1)">← Atrás</button>
+        <button class="bpri" onclick="goStep(3)">Siguiente → Tablero</button>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="step" id="step3">
+      <div class="sh"><div class="sb">3</div><div class="st">Tablero e instalación</div></div>
+      <div class="card">
+        <div class="sec"><i class="ti ti-current-ac"></i>Tensión</div>
+        <div class="fr c2">
+          <div><label>Tensión</label>
+            <select id="tab-tension"><option value="mono">Monofásica 220V</option><option value="tri">Trifásica 380V</option></select>
+          </div>
+          <div><label>Medidor</label>
+            <select id="tab-medidor"><option value="si">Existente</option><option value="no">A instalar</option></select>
+          </div>
+        </div>
+        <div class="sec"><i class="ti ti-circuit-switchopen"></i>Protecciones</div>
+        <div class="fr c3">
+          <div><label>⚡ Disyuntor</label>
+            <select id="tab-disyuntor"><option>25 A</option><option>32 A</option><option selected>40 A</option><option>50 A</option><option>63 A</option></select>
+          </div>
+          <div><label>🔲 Termomagnéticas</label><input id="tab-termo" type="number" value="4" min="1" max="24" inputmode="numeric"/></div>
+          <div><label>🛡️ Diferenciales</label><input id="tab-dif" type="number" value="1" min="0" max="8" inputmode="numeric"/></div>
+        </div>
+        <div class="sec"><i class="ti ti-arrows-transfer-down"></i>Tendido</div>
+        <div class="tog-row" id="tog-cable">
+          <button class="tog sel" onclick="toggleOpt(this,'cable')">Embutido</button>
+          <button class="tog" onclick="toggleOpt(this,'cable')">Bandeja</button>
+          <button class="tog" onclick="toggleOpt(this,'cable')">A la vista</button>
+        </div>
+        <div class="sec"><i class="ti ti-tool"></i>Extras</div>
+        <div class="tog-row" id="tog-extra">
+          <button class="tog" onclick="toggleMulti(this)">TV / señal</button>
+          <button class="tog" onclick="toggleMulti(this)">Red / datos</button>
+          <button class="tog" onclick="toggleMulti(this)">Portero</button>
+          <button class="tog" onclick="toggleMulti(this)">Alarma</button>
+          <button class="tog" onclick="toggleMulti(this)">Puesta a tierra</button>
+          <button class="tog" onclick="toggleMulti(this)">Split / AC</button>
+        </div>
+        <div class="sec"><i class="ti ti-ruler"></i>Distancia tablero → medidor</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="tab-dist" type="number" value="5" min="1" style="max-width:90px" inputmode="numeric"/>
+          <span style="font-size:13px;color:#888">metros</span>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="bsec" onclick="goStep(2)">← Atrás</button>
+        <button class="bpri" onclick="iniciarCalculo()">⚡ Calcular presupuesto</button>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="step" id="step4">
+      <div class="sh"><div class="sb" style="background:#0F6E56">4</div><div class="st">Presupuesto</div></div>
+      <div class="card" id="res-cliente"></div>
+      <button class="brecargar" id="btn-recargar" onclick="recargarPrecios()" style="display:none">
+        <i class="ti ti-refresh"></i> Actualizar precios de Mercado Libre
+      </button>
+      <div class="pbox" id="pbox"></div>
+      <div class="tgrid" id="breakdown"></div>
+      <div class="note" id="nota-precios"></div>
+      <div class="card">
+        <div class="sec-lbl"><span><i class="ti ti-plug"></i> Materiales</span><span id="mat-ts"></span></div>
+        <div class="twrap"><table class="rtbl" id="tbl-mat"><thead><tr><th>Material</th><th>Cant.</th><th style="text-align:right">P. unit.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <div class="sec-lbl"><span><i class="ti ti-hammer"></i> Mano de obra (AAIERIC −15%)</span></div>
+        <div class="twrap"><table class="rtbl" id="tbl-mo"><thead><tr><th>Concepto</th><th>Cant.</th><th style="text-align:right">P. unit.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div style="margin-top:.5rem">
+        <button class="baction" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir / guardar PDF</button>
+        <button class="baction primary" onclick="guardarPresupuesto()"><i class="ti ti-device-floppy"></i> Guardar en historial</button>
+        <button class="bnuevo" style="margin-top:2px" onclick="resetApp()">+ Nuevo relevamiento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://lspezykznjdreopsujrp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGV6eWt6bmpkcmVvcHN1anJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzQ5MjAsImV4cCI6MjA5NjI1MDkyMH0.nUCoFfRupbu0iVS7RTSzdAehXgD82xCHt2R5j3cEFA0';
+let sbReady = false;
+
+function guardarConfig() {}
+
+async function initSupabase() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    document.getElementById('cfg-banner').style.display = 'block';
+    return;
+  }
+  // Crear tabla si no existe — usamos la REST API de Supabase
+  // La tabla se crea desde el SQL editor de Supabase; aquí solo validamos conexión
+  try {
+    const r = await sbFetch('GET', '/rest/v1/presupuestos?select=id&limit=1');
+    if (r.ok) {
+      sbReady = true;
+      setStatus('online');
+      toast('✓ Conectado a la nube');
+    } else if (r.status === 404 || r.status === 400) {
+      // tabla no existe
+      toast('⚠️ Tabla no creada aún — seguí las instrucciones', 4000);
+    }
+  } catch {
+    setStatus('offline');
+  }
+}
+
+async function sbFetch(method, path, body) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : '',
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(SUPABASE_URL + path, opts);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PRECIOS ML + FALLBACK
+// ══════════════════════════════════════════════════════════════════
+const FALLBACK = {
+  cable15_r100:35000, cable25_r100:47000, cable4_r100:72000,
+  tierra_r100:35000,  caneria_r100:28000,
+  tablero_mono:12000, tablero_tri:22000,
+  disy_25a:28000, disy_32a:28000, disy_40a:28000, disy_50a:31000, disy_63a:34000,
+  termica:7000, diferencial:33000,
+  tomacorriente:5500, llave_simple:4500,
+  caja_rect:1200, caja_oct:2000, tapa_marco:2000,
+  boca_tv:3500, boca_datos:4500, jabalina_kit:15000,
+  cinta:2500, tornilleria:3000,
+};
+const ML_Q = {
+  cable15_r100:'cable unipolar 1.5mm 100 metros iram',
+  cable25_r100:'cable unipolar 2.5mm 100 metros iram',
+  cable4_r100:'cable unipolar 4mm 100 metros electricidad',
+  tierra_r100:'cable tierra verde amarillo 100m',
+  caneria_r100:'caño corrugado 3/4 electricidad 100m',
+  tablero_mono:'tablero gabinete 6 polos monofasico electricidad',
+  tablero_tri:'tablero gabinete trifasico electricidad',
+  disy_40a:'disyuntor bipolar sica 40a',
+  termica:'llave termica unipolar sica 10a',
+  diferencial:'disyuntor diferencial bipolar sica 25a',
+  tomacorriente:'tomacorriente doble sica life armado',
+  llave_simple:'llave simple punto sica life armada',
+  caja_rect:'caja rectangular pvc electricidad',
+  caja_oct:'caja octogonal pvc electricidad',
+  boca_tv:'boca tv coaxial completa electricidad',
+  boca_datos:'boca datos rj45 electricidad',
+  jabalina_kit:'kit jabalina puesta a tierra 1.5m',
+};
+
+let mlPrices={}, mlTs=null, mlSrc='fallback';
+
+async function fetchML(q) {
+  try {
+    const r = await fetch('https://api.mercadolibre.com/sites/MLA/search?q='+encodeURIComponent(q)+'&limit=5', {signal:AbortSignal.timeout(5000)});
+    if(!r.ok) return null;
+    const d = await r.json();
+    const ps = (d.results||[]).map(x=>x.price).filter(p=>p>500).sort((a,b)=>a-b);
+    return ps[0]||null;
+  } catch { return null; }
+}
+
+async function fetchAllML() {
+  setStatus('loading');
+  document.getElementById('mat-ts').textContent='Actualizando…';
+  const keys=Object.keys(ML_Q), res={};
+  let ok=0;
+  for(let i=0;i<keys.length;i+=3) {
+    const batch=keys.slice(i,i+3);
+    const vals=await Promise.all(batch.map(k=>fetchML(ML_Q[k])));
+    batch.forEach((k,j)=>{ if(vals[j]){res[k]=vals[j];ok++;} });
+  }
+  if(ok>=3){
+    mlPrices=res; mlTs=new Date(); mlSrc='live';
+    localStorage.setItem('mlP',JSON.stringify(res));
+    localStorage.setItem('mlT',mlTs.toISOString());
+    setStatus('online');
+    document.getElementById('mat-ts').textContent='✓ ML '+fmtT(mlTs);
+    return true;
+  }
+  setStatus('offline');
+  document.getElementById('mat-ts').textContent='Sin internet — precios de referencia';
+  return false;
+}
+
+function loadCached(){
+  const s=localStorage.getItem('mlP'),t=localStorage.getItem('mlT');
+  if(s&&t){mlPrices=JSON.parse(s);mlTs=new Date(t);mlSrc='cached';return true;}
+  return false;
+}
+function gp(k){ return mlPrices[k]||FALLBACK[k]||0; }
+function gpi(k){
+  if(mlPrices[k]){
+    if(mlSrc==='live')   return {p:mlPrices[k],s:'live'};
+    if(mlSrc==='cached') return {p:mlPrices[k],s:'cache'};
+  }
+  return {p:FALLBACK[k]||0,s:'ref'};
+}
+function fmtT(d){ return d?d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+' '+d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):''; }
+function setStatus(s){
+  const d=document.getElementById('sdot');
+  d.className='sdot '+(s==='online'?'online':s==='loading'?'loading':'');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MANO DE OBRA AAIERIC -15%
+// ══════════════════════════════════════════════════════════════════
+const D=0.85;
+const MO={
+  bocaCompleta: Math.round(104220*D), cableadoBoca:Math.round(35706*D),
+  conexionPunto:Math.round(18611*D),  tomaCorrDoble:Math.round(23573*D),
+  artefacto:    Math.round(28561*D),  tableroPrin:Math.round(307873*D),
+  tableroTrif:  Math.round(416917*D), termoAd:Math.round(75696*D),
+  difAd:        Math.round(75696*D),  pat:Math.round(156271*D),
+  acometidaMono:Math.round(218812*D), acometidaTri:Math.round(306800*D),
+};
+
+// ══════════════════════════════════════════════════════════════════
+// ROOMS
+// ══════════════════════════════════════════════════════════════════
+const RT=['Living / comedor','Dormitorio principal','Dormitorio','Cocina','Baño','Baño completo','Estudio','Garage','Lavadero','Pasillo','Patio / exterior'];
+let rooms=[],roomId=0;
+
+function addRoom(){
+  const id=++roomId;
+  rooms.push({id,name:RT[Math.min(roomId-1,RT.length-1)],metros:4,items:{bocas:0,tomacorrientes:0,llaves:0,focos:0,tv:0,datos:0}});
+  renderRooms();
+}
+function removeRoom(id){rooms=rooms.filter(r=>r.id!==id);renderRooms();}
+function updateRoomName(id,v){rooms.find(r=>r.id===id).name=v;}
+function updateMetros(id,v){rooms.find(r=>r.id===id).metros=Math.max(1,parseInt(v)||1);}
+function changeCounter(rid,key,delta){
+  const r=rooms.find(r=>r.id===rid);
+  r.items[key]=Math.max(0,(r.items[key]||0)+delta);
+  const el=document.getElementById('cv-'+rid+'-'+key);
+  if(el)el.textContent=r.items[key];
+}
+function renderRooms(){
+  const c=document.getElementById('rooms-container');
+  if(!rooms.length){c.innerHTML='<p style="color:#aaa;font-size:13px;margin-bottom:1rem">Agregá al menos un ambiente.</p>';return;}
+  c.innerHTML=rooms.map(r=>`
+    <div class="rc">
+      <div class="rctop">
+        <select class="room-sel" onchange="updateRoomName(${r.id},this.value)">
+          ${RT.map(t=>`<option ${t===r.name?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <button class="brm" onclick="removeRoom(${r.id})">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:12px;color:#888">Metros de cable:</span>
+        <input type="number" value="${r.metros}" min="1" style="width:60px;padding:6px 8px;font-size:14px" onchange="updateMetros(${r.id},this.value)" inputmode="numeric"/>
+        <span style="font-size:12px;color:#888">m</span>
+      </div>
+      <div class="rgrid">
+        ${rci(r.id,'bocas','Boca de luz',r.items.bocas)}
+        ${rci(r.id,'tomacorrientes','Tomacorriente',r.items.tomacorrientes)}
+        ${rci(r.id,'llaves','Llave de luz',r.items.llaves)}
+        ${rci(r.id,'focos','Foco / luminaria',r.items.focos)}
+        ${rci(r.id,'tv','Boca TV',r.items.tv)}
+        ${rci(r.id,'datos','Boca datos',r.items.datos)}
+      </div>
+    </div>`).join('');
+}
+function rci(rid,key,label,val){
+  return `<div class="ci"><div class="cl">${label}</div><div class="cc">
+    <button class="bc" onclick="changeCounter(${rid},'${key}',-1)">−</button>
+    <span class="cv" id="cv-${rid}-${key}">${val}</span>
+    <button class="bc" onclick="changeCounter(${rid},'${key}',1)">+</button>
+  </div></div>`;
+}
+function toggleOpt(btn,group){
+  document.querySelectorAll('#tog-'+group+' .tog').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function toggleMulti(btn){btn.classList.toggle('sel');}
+
+// ══════════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════════════════════
+function goStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+  for(let i=1;i<=4;i++){
+    document.getElementById('ps'+i).classList.toggle('done',i<=n);
+    document.getElementById('pl'+i).classList.toggle('act',i===n);
+  }
+  window.scrollTo(0,0);
+}
+function showTab(tab){
+  document.getElementById('tab-nuevo').style.display=tab==='nuevo'?'block':'none';
+  document.getElementById('tab-historial').style.display=tab==='historial'?'block':'none';
+  document.getElementById('tab-btn-nuevo').classList.toggle('active',tab==='nuevo');
+  document.getElementById('tab-btn-historial').classList.toggle('active',tab==='historial');
+  if(tab==='historial') renderHistorial();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CÁLCULO
+// ══════════════════════════════════════════════════════════════════
+let currentCalc=null;
+
+async function iniciarCalculo(){
+  if(!rooms.length){alert('Agregá al menos un ambiente.');return;}
+  goStep(4);
+  document.getElementById('btn-recargar').style.display='flex';
+  const ok=await fetchAllML();
+  if(!ok) loadCached();
+  renderResultados();
+}
+async function recargarPrecios(){
+  const ok=await fetchAllML();
+  if(ok||mlSrc!=='fallback') renderResultados();
+}
+
+function fmt(n){return '$\u202F'+Math.round(n).toLocaleString('es-AR');}
+function mlUrl(q){return 'https://listado.mercadolibre.com.ar/'+encodeURIComponent(q).replace(/%20/g,'-');}
+
+function renderResultados(){
+  const totBocas  =rooms.reduce((s,r)=>s+r.items.bocas,0);
+  const totToma   =rooms.reduce((s,r)=>s+r.items.tomacorrientes,0);
+  const totLlaves =rooms.reduce((s,r)=>s+r.items.llaves,0);
+  const totFocos  =rooms.reduce((s,r)=>s+r.items.focos,0);
+  const totTV     =rooms.reduce((s,r)=>s+r.items.tv,0);
+  const totDatos  =rooms.reduce((s,r)=>s+r.items.datos,0);
+  const metrosBase=rooms.reduce((s,r)=>s+Number(r.metros),0);
+  const distAcom  =parseInt(document.getElementById('tab-dist').value)||5;
+  const esTri     =document.getElementById('tab-tension').value==='tri';
+  const medNuevo  =document.getElementById('tab-medidor').value==='no';
+  const termo     =parseInt(document.getElementById('tab-termo').value)||4;
+  const dif       =parseInt(document.getElementById('tab-dif').value)||1;
+  const disyT     =document.getElementById('tab-disyuntor').value;
+  const disyN     =parseInt(disyT);
+  const extras    =[...document.querySelectorAll('#tog-extra .tog.sel')].map(b=>b.textContent.trim());
+  const conPAT    =extras.includes('Puesta a tierra');
+
+  const mar=1.15;
+  const c15=Math.round((metrosBase+distAcom)*2*mar);
+  const c25=Math.round((totToma*4+distAcom)*mar);
+  const c4 =esTri?Math.round((distAcom+4)*mar):0;
+  const cT =Math.round((distAcom+metrosBase*0.3)*mar);
+  const cC =Math.round(metrosBase*1.1);
+
+  const matItems=[
+    ['Cable unipolar 1.5mm² (rollo 100m)', Math.ceil(c15/100), 'cable15_r100', ML_Q.cable15_r100],
+    ['Cable unipolar 2.5mm² (rollo 100m)', Math.ceil(c25/100), 'cable25_r100', ML_Q.cable25_r100],
+  ];
+  if(c4) matItems.push(['Cable unipolar 4mm² (rollo 100m)',Math.ceil(c4/100),'cable4_r100',ML_Q.cable4_r100]);
+  matItems.push(['Cable tierra verde/amarillo (rollo 100m)',Math.ceil(cT/100),'tierra_r100',ML_Q.tierra_r100]);
+  matItems.push(['Cañería corrugada 3/4" (rollo 100m)',Math.ceil(cC/100),'caneria_r100',ML_Q.caneria_r100]);
+  matItems.push([`Tablero/gabinete ${esTri?'trifásico':'monofásico'}`,1,esTri?'tablero_tri':'tablero_mono',ML_Q[esTri?'tablero_tri':'tablero_mono']]);
+  matItems.push([`Disyuntor principal ${disyT}`,1,`disy_${disyN}a`,ML_Q.disy_40a]);
+  matItems.push(['Termomagnética unipolar SICA',termo,'termica',ML_Q.termica]);
+  matItems.push(['Diferencial bipolar SICA',dif,'diferencial',ML_Q.diferencial]);
+  if(totToma>0)  matItems.push(['Tomacorriente doble SICA LIFE',totToma,'tomacorriente',ML_Q.tomacorriente]);
+  if(totLlaves>0) matItems.push(['Llave simple SICA LIFE',totLlaves,'llave_simple',ML_Q.llave_simple]);
+  if(totBocas>0) matItems.push(['Caja rectangular PVC',totBocas,'caja_rect',ML_Q.caja_rect]);
+  if(totFocos>0) matItems.push(['Caja octogonal + portalámpara',totFocos,'caja_oct',ML_Q.caja_oct]);
+  if(totBocas+totToma+totLlaves>0) matItems.push(['Tapas / marcos',totBocas+totToma+totLlaves,'tapa_marco',ML_Q.caja_rect]);
+  if(totTV>0)    matItems.push(['Boca TV coaxial',totTV,'boca_tv',ML_Q.boca_tv]);
+  if(totDatos>0) matItems.push(['Boca datos RJ45',totDatos,'boca_datos',ML_Q.boca_datos]);
+  if(conPAT)     matItems.push(['Kit jabalina puesta a tierra',1,'jabalina_kit',ML_Q.jabalina_kit]);
+  matItems.push(['Cinta aisladora (x2)',2,'cinta','cinta aisladora tacsa']);
+  matItems.push(['Tornillería + tacos',1,'tornilleria','tornilleria electrica']);
+
+  const totalMat=matItems.reduce((s,it)=>s+it[1]*gp(it[2]),0);
+
+  const moItems=[];
+  const totP=totBocas+totLlaves;
+  if(totP>0)       moItems.push(['Boca completa (luz/llave)',totP,MO.bocaCompleta]);
+  if(totToma>0)    moItems.push(['Tomacorriente doble – instalación',totToma,MO.tomaCorrDoble+MO.cableadoBoca]);
+  if(totFocos>0)   moItems.push(['Artefacto iluminación – colocación',totFocos,MO.artefacto]);
+  if(totTV+totDatos>0) moItems.push(['Boca TV/datos',totTV+totDatos,MO.conexionPunto]);
+  moItems.push([`Tablero principal ${esTri?'trifásico':'monofásico'}`,1,esTri?MO.tableroTrif:MO.tableroPrin]);
+  const termoAd=Math.max(0,termo-1),difAd=Math.max(0,dif-1);
+  if(termoAd>0) moItems.push(['Termomagnética adicional',termoAd,MO.termoAd]);
+  if(difAd>0)   moItems.push(['Diferencial adicional',difAd,MO.difAd]);
+  if(medNuevo)  moItems.push([`Acometida ${esTri?'trifásica':'monofásica'}`,1,esTri?MO.acometidaTri:MO.acometidaMono]);
+  if(conPAT)    moItems.push(['Puesta a tierra – jabalina',1,MO.pat]);
+  const totalMO=moItems.reduce((s,it)=>s+it[1]*it[2],0);
+  const total=totalMat+totalMO;
+
+  currentCalc={matItems,moItems,totalMat,totalMO,total,mlSrc,mlTs,
+    nombre:document.getElementById('cli-nombre').value,
+    dir:document.getElementById('cli-dir').value,
+    tel:document.getElementById('cli-tel').value,
+    fecha:document.getElementById('cli-fecha').value,
+    notas:document.getElementById('cli-notas').value,
+    tipo:document.getElementById('cli-tipo').value,
+    rooms:JSON.parse(JSON.stringify(rooms)),
+  };
+
+  // render cliente
+  const nombre=currentCalc.nombre||'Cliente';
+  const ini=nombre.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'??';
+  const tipoSel=document.getElementById('cli-tipo');
+  const tipoTxt=tipoSel.options[tipoSel.selectedIndex].text;
+  document.getElementById('res-cliente').innerHTML=`
+    <div class="cli-row">
+      <div class="ava">${ini}</div>
+      <div><p style="font-size:15px;font-weight:700">${nombre}</p><p style="font-size:12px;color:#888">${currentCalc.dir||'—'} · ${currentCalc.fecha||'—'}</p></div>
+      <span class="tag tb" style="margin-left:auto">${tipoTxt}</span>
+    </div>
+    <p style="font-size:11px;color:#aaa">${rooms.length} amb. · ${totBocas+totToma+totLlaves+totFocos} puntos · ${metrosBase} m lin.</p>`;
+
+  document.getElementById('pbox').innerHTML=`
+    <div class="lbl">Total estimado (materiales + mano de obra)</div>
+    <div class="val">${fmt(total)}</div>
+    <div class="sub">Materiales ${fmt(totalMat)} · Mano de obra ${fmt(totalMO)}</div>`;
+
+  document.getElementById('breakdown').innerHTML=`
+    <div class="mc blue"><div class="mlbl">Materiales</div><div class="mval">${fmt(totalMat)}</div></div>
+    <div class="mc green"><div class="mlbl">Mano de obra</div><div class="mval">${fmt(totalMO)}</div></div>`;
+
+  const srcTxt=mlSrc==='live'?`✅ Precios ML actualizados ${fmtT(mlTs)}`:
+               mlSrc==='cached'?`⚠️ Precios ML en caché (${fmtT(mlTs)})`:
+               `📴 Sin conexión — precios de referencia jun. 2026`;
+  document.getElementById('nota-precios').innerHTML=`<strong>Materiales:</strong> ${srcTxt}.<br><strong>Mano de obra:</strong> AAIERIC may. 2026 −15% (Entre Ríos).`;
+
+  // tabla materiales
+  let mh=matItems.map(it=>{
+    const pi=gpi(it[2]);
+    const sc=pi.s==='live'?'src-live':pi.s==='cache'?'src-cache':'src-ref';
+    return `<tr>
+      <td>${it[0]} <a class="ml-link" href="${mlUrl(it[3])}" target="_blank">↗</a></td>
+      <td><span class="tag tb">${it[1]}</span></td>
+      <td class="pc">${fmt(pi.p)} <span class="${sc}">${pi.s}</span></td>
+      <td class="pc">${fmt(it[1]*pi.p)}</td>
+    </tr>`;
+  }).join('');
+  mh+=`<tr class="stotal"><td colspan="2">TOTAL MATERIALES</td><td></td><td class="pc" style="color:#185FA5">${fmt(totalMat)}</td></tr>`;
+  document.querySelector('#tbl-mat tbody').innerHTML=mh;
+
+  let moh=moItems.map(it=>`<tr>
+    <td>${it[0]}</td><td><span class="tag tp">${it[1]}</span></td>
+    <td class="pc">${fmt(it[2])}</td><td class="pc">${fmt(it[1]*it[2])}</td>
+  </tr>`).join('');
+  moh+=`<tr class="stotal"><td colspan="2">TOTAL MANO DE OBRA</td><td></td><td class="pc" style="color:#185FA5">${fmt(totalMO)}</td></tr>`;
+  document.querySelector('#tbl-mo tbody').innerHTML=moh;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// GUARDAR / HISTORIAL
+// ══════════════════════════════════════════════════════════════════
+async function guardarPresupuesto(){
+  if(!currentCalc){toast('Calculá primero el presupuesto');return;}
+  const entry={
+    nombre:currentCalc.nombre||'Sin nombre',
+    telefono:currentCalc.tel||'',
+    direccion:currentCalc.dir||'',
+    fecha_relevamiento:currentCalc.fecha||new Date().toISOString().split('T')[0],
+    tipo_obra:currentCalc.tipo||'nueva',
+    notas:currentCalc.notas||'',
+    total_materiales:Math.round(currentCalc.totalMat),
+    total_mano_obra:Math.round(currentCalc.totalMO),
+    total_general:Math.round(currentCalc.total),
+    ambientes:currentCalc.rooms.length,
+    datos_json:JSON.stringify({rooms:currentCalc.rooms,matItems:currentCalc.matItems,moItems:currentCalc.moItems}),
+    created_at:new Date().toISOString(),
+  };
+
+  // Guardar localmente siempre
+  const local=JSON.parse(localStorage.getItem('historial')||'[]');
+  const localEntry={...entry,id:'local_'+Date.now()};
+  local.unshift(localEntry);
+  if(local.length>100) local.pop();
+  localStorage.setItem('historial',JSON.stringify(local));
+
+  // Guardar en Supabase si está disponible
+  if(sbReady){
+    try {
+      const r=await sbFetch('POST','/rest/v1/presupuestos',entry);
+      if(r.ok){
+        toast('✓ Guardado en la nube y en el celular');
+        return;
+      }
+    } catch {}
+    toast('✓ Guardado localmente (error nube)');
+  } else {
+    toast('✓ Guardado en el celular');
+  }
+}
+
+async function cargarHistorialCloud(){
+  if(!sbReady) return [];
+  try {
+    const r=await sbFetch('GET','/rest/v1/presupuestos?select=*&order=created_at.desc&limit=100');
+    if(r.ok) return await r.json();
+  } catch {}
+  return [];
+}
+
+async function renderHistorial(){
+  const search=(document.getElementById('hist-search')?.value||'').toLowerCase();
+  const el=document.getElementById('hist-list');
+
+  // Intentar cargar nube + local
+  let cloudItems=[];
+  if(sbReady) cloudItems=await cargarHistorialCloud();
+  const localItems=JSON.parse(localStorage.getItem('historial')||'[]');
+
+  // Deduplicar: preferir cloud, identificar por nombre+fecha
+  const seen=new Set();
+  let all=[];
+  for(const it of cloudItems){
+    const k=it.nombre+'|'+it.fecha_relevamiento;
+    if(!seen.has(k)){seen.add(k);all.push({...it,_src:'cloud'});}
+  }
+  for(const it of localItems){
+    const k=it.nombre+'|'+it.fecha_relevamiento;
+    if(!seen.has(k)){seen.add(k);all.push({...it,_src:'local'});}
+  }
+
+  // Filtrar
+  if(search) all=all.filter(it=>(it.nombre||'').toLowerCase().includes(search)||(it.direccion||'').toLowerCase().includes(search));
+
+  document.getElementById('hist-count').textContent=`${all.length} relevamiento${all.length!==1?'s':''}`;
+
+  if(!all.length){
+    el.innerHTML=`<div class="hist-empty">
+      <div class="hist-empty-icon">${search?'🔍':'📋'}</div>
+      <p style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px">${search?'Sin resultados':'Historial vacío'}</p>
+      <p style="font-size:13px;color:var(--text3)">${search?'Probá con otro nombre o dirección':'Los presupuestos guardados aparecen acá'}</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML=all.map(e=>{
+    const srcIcon=e._src==='cloud'?'☁️':'📱';
+    const tipos={nueva:'Instalación nueva',refaccion:'Refacción',ampliacion:'Ampliación'};
+    return `<div class="hist-item">
+      <div class="hist-top">
+        <span class="hist-nombre">${e.nombre||'Sin nombre'}</span>
+        <span class="hist-total">${fmt(e.total_general||0)}</span>
+      </div>
+      <div class="hist-sub">${e.direccion||'—'} · ${e.fecha_relevamiento||'—'} · ${e.ambientes||0} amb.</div>
+      <div class="hist-tags">
+        <span class="tag tb">${tipos[e.tipo_obra]||e.tipo_obra||'—'}</span>
+        <span class="tag tg">Mat. ${fmt(e.total_materiales||0)}</span>
+        <span class="tag tp">MO ${fmt(e.total_mano_obra||0)}</span>
+        <span style="font-size:11px;color:#aaa">${srcIcon} ${e._src==='cloud'?'Nube':'Celular'}</span>
+      </div>
+      ${e.notas?`<p style="font-size:12px;color:#888;margin-top:6px">📝 ${e.notas}</p>`:''}
+      <div class="hist-actions">
+        <button class="hbtn" onclick="verDetalle('${e.id||''}','${e._src}')"><i class="ti ti-eye"></i> Ver detalle</button>
+        ${e.telefono?`<a class="hbtn" href="tel:${e.telefono}"><i class="ti ti-phone"></i> Llamar</a>`:''}
+        <button class="hbtn danger" onclick="eliminarEntry('${e.id||''}','${e._src}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function verDetalle(id,src){
+  // Buscar en local
+  const local=JSON.parse(localStorage.getItem('historial')||'[]');
+  const entry=local.find(e=>String(e.id)===String(id));
+  if(!entry){toast('Detalle solo disponible en el celular donde se creó');return;}
+  try {
+    const d=JSON.parse(entry.datos_json||'{}');
+    const matRows=(d.matItems||[]).map(it=>`<tr><td>${it[0]}</td><td>${it[1]}</td><td class="pc">${fmt(it[1]*(it[4]||0))}</td></tr>`).join('');
+    const moRows=(d.moItems||[]).map(it=>`<tr><td>${it[0]}</td><td>${it[1]}</td><td class="pc">${fmt(it[1]*it[2])}</td></tr>`).join('');
+    // Abrir en ventana de impresión
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Presupuesto ${entry.nombre}</title>
+    <style>body{font-family:system-ui;padding:2rem;max-width:700px;margin:0 auto}h1{font-size:20px;margin-bottom:4px}
+    .sub{color:#888;font-size:13px;margin-bottom:1.5rem}table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1.5rem}
+    th{text-align:left;padding:6px;background:#f5f5f3;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+    td{padding:7px 6px;border-bottom:1px solid #eee}.pc{text-align:right;font-weight:700}
+    .total-row{font-weight:700;font-size:15px}.total-box{background:#185FA5;color:#fff;padding:1rem 1.25rem;border-radius:10px;margin-bottom:1rem}
+    .total-box .lbl{font-size:12px;opacity:.8}.total-box .val{font-size:24px;font-weight:700}
+    </style></head><body>
+    <h1>${entry.nombre}</h1>
+    <div class="sub">${entry.direccion||'—'} · ${entry.fecha_relevamiento||'—'} · ${entry.tipo_obra||''}</div>
+    <div class="total-box"><div class="lbl">Total estimado</div><div class="val">${fmt(entry.total_general||0)}</div></div>
+    <h3 style="margin-bottom:.5rem">Materiales</h3>
+    <table><thead><tr><th>Material</th><th>Cant.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>${matRows}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">TOTAL MATERIALES</td><td class="pc">${fmt(entry.total_materiales||0)}</td></tr></tfoot></table>
+    <h3 style="margin-bottom:.5rem">Mano de obra</h3>
+    <table><thead><tr><th>Concepto</th><th>Cant.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>${moRows}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">TOTAL MANO DE OBRA</td><td class="pc">${fmt(entry.total_mano_obra||0)}</td></tr></tfoot></table>
+    ${entry.notas?`<p><strong>Notas:</strong> ${entry.notas}</p>`:''}
+    <p style="color:#aaa;font-size:11px;margin-top:2rem">Precios de referencia · Diamante, Entre Ríos</p>
+    <script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.close();
+  } catch { toast('No se pudo cargar el detalle'); }
+}
+
+async function eliminarEntry(id,src){
+  if(!confirm('¿Eliminás este relevamiento?')) return;
+  // Borrar local
+  let local=JSON.parse(localStorage.getItem('historial')||'[]');
+  local=local.filter(e=>String(e.id)!==String(id));
+  localStorage.setItem('historial',JSON.stringify(local));
+  // Borrar nube
+  if(src==='cloud'&&sbReady){
+    await sbFetch('DELETE',`/rest/v1/presupuestos?id=eq.${id}`);
+  }
+  renderHistorial();
+  toast('Eliminado');
+}
+
+function resetApp(){
+  rooms=[];roomId=0;currentCalc=null;
+  ['cli-nombre','cli-tel','cli-dir','cli-piso','cli-m2','cli-notas'].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.value='';
+  });
+  document.getElementById('btn-recargar').style.display='none';
+  renderRooms();goStep(1);showTab('nuevo');
+}
+
+function toast(msg,ms=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+loadCached();
+initSupabase();
+addRoom();addRoom();
+document.getElementById('cli-fecha').value=new Date().toISOString().split('T')[0];
+goStep(1);
+window.addEventListener('online', ()=>{setStatus('online');initSupabase();});
+window.addEventListener('offline',()=>setStatus(''));
+
+// ── ANIMACIONES ──────────────────────────────────
+
+
+// ── ALCANCE DE OBRA ──────────────────────────────
+const PIEZAS_DISPONIBLES = [
+  {id:'living',    icon:'🛋️', label:'Living'},
+  {id:'cocina',    icon:'🍳', label:'Cocina'},
+  {id:'dormitorio',icon:'🛏️', label:'Dormitorio'},
+  {id:'dorm2',     icon:'🛏️', label:'Dormit. 2'},
+  {id:'dorm3',     icon:'🛏️', label:'Dormit. 3'},
+  {id:'baño',      icon:'🚿', label:'Baño'},
+  {id:'baño2',     icon:'🚿', label:'Baño 2'},
+  {id:'cocina2',   icon:'🍽️', label:'Comedor'},
+  {id:'estudio',   icon:'💻', label:'Estudio'},
+  {id:'garage',    icon:'🚗', label:'Garage'},
+  {id:'lavadero',  icon:'🧺', label:'Lavadero'},
+  {id:'patio',     icon:'🌿', label:'Patio'},
+];
+
+let alcanceMode = 'casa';        // 'casa' | 'piezas'
+let piezasSeleccionadas = new Set();
+
+function onTipoChange() {
+  const tipo = document.getElementById('cli-tipo').value;
+  const wrap = document.getElementById('alcance-wrap');
+  const m2wrap = document.getElementById('m2-wrap');
+  if (tipo === 'refaccion' || tipo === 'ampliacion') {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    alcanceMode = 'casa';
+    piezasSeleccionadas.clear();
+    m2wrap.style.display = 'block';
+  }
+}
+
+function setAlcance(mode, btn) {
+  alcanceMode = mode;
+  document.querySelectorAll('#tog-alcance .tog').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const pw = document.getElementById('piezas-wrap');
+  const m2w = document.getElementById('m2-wrap');
+  if (mode === 'piezas') {
+    pw.style.display = 'block';
+    m2w.style.display = 'none';
+    renderPiezasGrid();
+  } else {
+    pw.style.display = 'none';
+    m2w.style.display = 'block';
+    piezasSeleccionadas.clear();
+  }
+}
+
+function renderPiezasGrid() {
+  const grid = document.getElementById('piezas-grid');
+  grid.innerHTML = PIEZAS_DISPONIBLES.map(p => `
+    <button class="pieza-btn ${piezasSeleccionadas.has(p.id)?'sel':''}" onclick="togglePieza('${p.id}',this)">
+      <span class="pieza-icon">${p.icon}</span>${p.label}
+    </button>`).join('');
+}
+
+function togglePieza(id, btn) {
+  if (piezasSeleccionadas.has(id)) {
+    piezasSeleccionadas.delete(id);
+    btn.classList.remove('sel');
+  } else {
+    piezasSeleccionadas.add(id);
+    btn.classList.add('sel');
+  }
+}
+
+// Mapa pieza → nombre de ambiente en RT[]
+const PIEZA_A_AMBIENTE = {
+  living:'Living / comedor', cocina:'Cocina', dormitorio:'Dormitorio principal',
+  dorm2:'Dormitorio', dorm3:'Dormitorio', baño:'Baño', baño2:'Baño completo',
+  cocina2:'Living / comedor', estudio:'Estudio', garage:'Garage',
+  lavadero:'Lavadero', patio:'Patio / exterior'
+};
+
+function irAmbientes() {
+  // Si eligió piezas específicas, pre-cargar esos ambientes
+  if (alcanceMode === 'piezas' && piezasSeleccionadas.size > 0) {
+    rooms = [];
+    roomId = 0;
+    piezasSeleccionadas.forEach(pid => {
+      const pieza = PIEZAS_DISPONIBLES.find(p => p.id === pid);
+      if (!pieza) return;
+      const id = ++roomId;
+      rooms.push({
+        id,
+        name: PIEZA_A_AMBIENTE[pid] || pieza.label,
+        metros: 4,
+        items: {bocas:0, tomacorrientes:0, llaves:0, focos:0, tv:0, datos:0}
+      });
+    });
+    renderRooms();
+  } else if (alcanceMode === 'piezas' && piezasSeleccionadas.size === 0) {
+    toast('Seleccioná al menos una pieza');
+    return;
+  }
+  goStep(2);
+}
+
+// Renderizar grid de piezas al cargar
+renderPiezasGrid();
+
+// ── LANDING PAGE JS ──────────────────────────────
+function createParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+  const colors = ['#facc15','#a78bfa','#7c3aed','#fbbf24'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 2 + Math.random() * 4;
+    const left = 10 + Math.random() * 80;
+    const bottom = Math.random() * 60;
+    const duration = 3 + Math.random() * 5;
+    const delay = Math.random() * 5;
+    const dx = (Math.random() - .5) * 60;
+    p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:${bottom}%;--dx:${dx}px;animation-duration:${duration}s;animation-delay:${delay}s;background:${colors[Math.floor(Math.random()*colors.length)]};box-shadow:0 0 ${size*2}px currentColor`;
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+function enterApp() {
+  const landing = document.getElementById('landing');
+  const app = document.getElementById('main-app');
+  const bt = document.getElementById('bolt-transition');
+  const shatter = document.getElementById('bt-shatter');
+
+  // Crear shards (fragmentos de pantalla que se van)
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement('div');
+    s.className = 'bt-shard';
+    const h = 12.5;
+    s.style.cssText = `top:${i*h}%;left:0;width:100%;height:${h+.5}%;--dy:${(i%2===0?-1:1)*(20+i*15)}px;animation-delay:${i*.03}s;animation-duration:.5s`;
+    shatter.appendChild(s);
+  }
+
+  // Activar transición
+  bt.classList.add('active');
+  
+  setTimeout(() => {
+    landing.classList.add('exit');
+  }, 150);
+
+  setTimeout(() => {
+    landing.style.display = 'none';
+    app.style.opacity = '1';
+    bt.classList.remove('active');
+    shatter.innerHTML = '';
+  }, 800);
+}
+
+// Ocultar splash después de que la landing esté lista
+window.addEventListener('load', () => {
+  // El splash ya tiene su propio timer, no necesitamos re-iniciarlo
+});
+
+// Splash screen
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.classList.add('hide');
+    setTimeout(() => splash.remove(), 600);
+  }, 2400);
+});
+
+// Partículas en click del header
+document.querySelector('.header')?.addEventListener('click', (e) => {
+  for(let i=0;i<6;i++){
+    const spark = document.createElement('div');
+    spark.className='spark';
+    const angle = (i/6)*Math.PI*2;
+    const dist = 30+Math.random()*20;
+    spark.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;position:fixed;z-index:9999;--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist}px`;
+    document.body.appendChild(spark);
+    setTimeout(()=>spark.remove(),1500);
+  }
+});
+
+// Contador animado para totales
+function animateCount(el, target, duration=800) {
+  const start = 0;
+  const startTime = performance.now();
+  const update = (now) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed/duration, 1);
+    const ease = 1 - Math.pow(1-progress, 3);
+    const val = Math.round(start + (target-start)*ease);
+    el.textContent = '$ ' + val.toLocaleString('es-AR');
+    if(progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+// Override renderResultados para animar totales
+const _origRender = renderResultados;
+renderResultados = function() {
+  _origRender();
+  // Animar el valor total
+  setTimeout(() => {
+    const pbox = document.getElementById('pbox');
+    if(pbox) pbox.classList.add('show');
+    const valEl = pbox?.querySelector('.val');
+    if(valEl) {
+      const raw = valEl.textContent.replace(/[^0-9]/g,'');
+      const num = parseInt(raw)||0;
+      animateCount(valEl, num, 900);
+    }
+  }, 50);
+};
+
+</script>
+</body>
+</html>
